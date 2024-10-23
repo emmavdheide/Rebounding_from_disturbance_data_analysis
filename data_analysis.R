@@ -28,20 +28,12 @@ dataCA$Plot<-as.factor(dataCA$Plot)
 dataCA$OTC.On<-as.factor(dataCA$OTC.On)
 dataCA$Group<-as.factor(dataCA$Group)
 dataCA$Row<-as.factor(dataCA$Row)
-dataCA$Bolting<-as.factor(dataCA$Bolting)
-dataCA$Survival<-as.factor(dataCA$Survival)
-dataCA$MultiStemsRosettesYN<-as.factor(dataCA$MultiStemsRosettesYN)
-dataCA$MultiStemsYN<-as.factor(dataCA$MultiStemsYN)
 dataCN$Species<-as.factor(dataCN$Species)
 dataCN$Treatment<-as.factor(dataCN$Treatment)
 dataCN$Plot<-as.factor(dataCN$Plot)
 dataCN$OTC.On<-as.factor(dataCN$OTC.On)
 dataCN$Group<-as.factor(dataCN$Group)
 dataCN$Row<-as.factor(dataCN$Row)
-dataCN$Bolting<-as.factor(dataCN$Bolting)
-dataCN$Survival<-as.factor(dataCN$Survival)
-dataCN$MultiStemsRosettesYN<-as.factor(dataCN$MultiStemsRosettesYN)
-dataCN$MultiStemsYN<-as.factor(dataCN$MultiStemsYN)
 
 #Analysis
 #Final Stems (C. acanthoides)
@@ -74,13 +66,13 @@ uprightstemplotCA
 
 #Final stems (C. nutans)
 #fit model and summarize
-#CHOOSE APPROPRIATE FAMILY AND UPDATE TEXT AND PLOTS ACCORDINGLY
-finalstemsCN<-glmmTMB(FinalStems~OTC.On*Treatment+MayLLL+MayStems+(1|Plot), data=dataCN, family="gamma")
+finalstemsCN<-glmmTMB(FinalStems~OTC.On*Treatment+MayLLL+MayStems+(1|Plot), data=dataCN, family="poisson")
 summary(finalstemsCN)
 
 #check residuals
 sim.finalstemsCN<-simulateResiduals(finalstemsCN)
 plot(sim.finalstemsCN)
+  #slight underdispersion, sticking with Poisson family for consistency, but note that power of this regression may be reduced
 
 #calculate estimated marginal means
 emmfsCN<-emmeans(finalstemsCN, specs=pairwise~Treatment|OTC.On, type="response")
@@ -93,7 +85,7 @@ uprightstemplotCN<-ggplot(No.stems.CN, aes(fill=emmeans.OTC.On, y=emmeans.rate, 
   scale_fill_manual(values=c("dodgerblue","brown1"))+
   theme(panel.background = element_blank(), panel.border = element_rect(color = "black",fill=NA, size=1))+
   labs(x="Treatment", y="Number of upright stems")+
-  ylim(0, 4.7)+
+  ylim(-0.1, 4.7)+
   ggtitle("Number of upright stems (C. nutans)")+
   geom_errorbar(position=position_dodge(0.9), aes(x=emmeans.Treatment, ymin=emmeans.asymp.LCL, ymax=emmeans.asymp.UCL), width=0.4, colour="gray20", alpha=0.9, linewidth=1.3)
 uprightstemplotCN
@@ -114,7 +106,7 @@ emmfsrCA
 
 #Final Stems + Rosettes (C. nutans)
 #fit model and summarize
-finalstemsrosettesCN<-glmmTMB(FinalStemsRosettes~OTC.On*Treatment+MayLLL+MayStems+(1|Plot), data=dataCN, family=poisson)
+finalstemsrosettesCN<-glmmTMB(FinalStemsRosettes~OTC.On*Treatment+MayLLL+MayStems+(1|Plot), data=dataCN, family="poisson")
 summary(finalstemsrosettesCN)
 
 #check residuals
@@ -132,7 +124,7 @@ dataCA$MaxHtcm<-dataCA$MaxHt/10
 dataCA$MayHtcm<-dataCA$MayHt/10
 
 #fit the model and summarize
-maxhtCA<-glmmTMB(MaxHtcm~OTC.On*Treatment+MayLLL+FinalStems+(1|Plot), data=dataCA)
+maxhtCA<-glmmTMB(MaxHtcm~OTC.On*Treatment+MayLLL+FinalStems+(1|Plot), data=dataCA, family = "gaussian")
 summary(maxhtCA)
 
 #check residuals
@@ -158,10 +150,9 @@ maxhtplotCA
 #Maximum Height (C. acanthoides)
 #first, convert height data from millimeters to centimeters
 dataCN$MaxHtcm<-dataCN$MaxHt/10
-dataCN$MayHtcm<-dataCN$MayHt/10
 
 #fit model and summarize
-maxhtCN<-glmmTMB(MaxHtcm~OTC.On*Treatment+MayLLL+FinalStems+(1|Plot), data=dataCN)
+maxhtCN<-glmmTMB(MaxHtcm~OTC.On*Treatment+MayLLL+FinalStems+(1|Plot), data=dataCN, family = "gaussian")
 summary(maxhtCN)
 
 #check residuals
